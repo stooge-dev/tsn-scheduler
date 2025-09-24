@@ -1,7 +1,11 @@
 #!/bin/bash/env python3
 
-from .utils import parse_args, read_network_from_csv, read_streams_from_csv
-from .scheduler import schedule
+"""
+PUBLIC SERVICE ANNOUNCMENT: all times are in microsecond
+"""
+
+from .utils import parse_args, read_network_from_csv, read_streams_from_csv, generate_streams
+from .scheduler import Scheduler
 
 def generate_variables(network, streams):
     pass
@@ -14,24 +18,13 @@ total_queues = args.total_queues
 best_effort_queues = total_queues - scheduled_queues
 
 network = read_network_from_csv(args.network_filename)
-streams = read_streams_from_csv(args.streams_filename, network)
+#streams = read_streams_from_csv(args.streams_filename, network)
+stream_count = 20
+streams = generate_streams(stream_count, [i for i in range(stream_count)], network, [i for i in range(stream_count)])
 
-schedule(network, streams, scheduled_queues, total_queues, best_effort_queues)
+scheduler = Scheduler(network, scheduled_queues)
+scheduler.schedule(streams)
 
 # TODO: make a benchmark generator?
 # TODO: generate GCL out of model
 # TODO: visualize the GCL?
-"""
-import plotly.figure_factory as ff
-import pandas as pd
-
-df = []
-
-for vl in vls:
-    for link in vl.path:
-        df.append(dict(Task=link.__repr__(), Start=s.model()[frame_offsets[vl][link]].as_long(), Finish=s.model()[frame_offsets[vl][link]].as_long()+vl.length, Resource=vl.name))
-
-fig = ff.create_gantt(pd.DataFrame(df), index_col="Resource", show_colorbar=True)
-fig.update_layout(xaxis_type="linear")
-fig.show()
-"""
