@@ -18,12 +18,13 @@ class Stream():
     
     def adjacent_link_pairs(self):
         alp = []
-        for link1 in self.path:
-            for link2 in self.path:
-                if link1.dst == link2.src and [link1, link2] not in alp:
-                    alp.append((link1, link2))
-                else:
-                    continue
+        current_idx = 0
+        while current_idx < len(self.path) - 1:
+            link1 = self.path[current_idx]
+            link2 = self.path[current_idx + 1]
+
+            alp.append((link1, link2))
+            current_idx += 1
 
         return alp
     
@@ -32,3 +33,33 @@ class Stream():
     
     def __str__(self):
         return "Stream(" + self.name + ")"
+    
+from abc import ABC, abstractmethod
+
+class StreamDependencyGraph(ABC):
+    def __init__(self, streams: Sequence[Stream]):
+        self.streams = streams
+        self.graph = {}
+        self.calculate_dependencies()
+
+    @abstractmethod
+    def calculate_dependencies(self):
+        pass
+
+class SameLinkSchedulingStreamDependencyGraph(StreamDependencyGraph):
+    def calculate_dependencies(self):
+        for stream1 in self.streams:
+            for stream2 in self.streams:
+                if stream1 == stream2:
+                    continue
+
+                weight = 0
+                for link1 in stream1.path:
+                    for link2 in stream2.path:
+                        if link1 != link2:
+                            continue
+
+                        weight += 1
+
+                self.graph[stream1][stream2] = weight
+                self.graph[stream2][stream1] = weight

@@ -19,11 +19,16 @@ best_effort_queues = total_queues - scheduled_queues
 
 network = read_network_from_csv(args.network_filename)
 #streams = read_streams_from_csv(args.streams_filename, network)
-stream_count = 20
+stream_count = 25
 streams = generate_streams(stream_count, [i for i in range(stream_count)], network, [i for i in range(stream_count)])
 
 scheduler = Scheduler(network, scheduled_queues)
 scheduler.schedule(streams)
+
+changed_stream = streams[0]
+changed_stream.deadline = 100
+streams[0] = changed_stream
+scheduler.reschedule(streams, changed_stream)
 
 # TODO: make a benchmark generator?
 # TODO: generate GCL out of model

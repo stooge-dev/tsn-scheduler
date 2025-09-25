@@ -25,7 +25,6 @@ def generate_streams(count: int, periods: Sequence[int], network: Network, frame
         path = [first_link]
         current_link = first_link
         deadline = 0
-        nodes_visited = []
         for link in network.links:
 
             if link.src == current_link.dst and link not in path:
@@ -33,7 +32,7 @@ def generate_streams(count: int, periods: Sequence[int], network: Network, frame
                 current_link = link
 
             # heuristic...
-            deadline += 2 * (MAX_MTU_SIZE_IN_BYTES / link.speed + link.delay)
+            deadline += 1.5 * (MAX_MTU_SIZE_IN_BYTES / link.speed + link.delay)
 
         if len(path) < 2:
             continue
