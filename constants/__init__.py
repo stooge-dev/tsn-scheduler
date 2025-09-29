@@ -1,1 +1,0 @@
-from .ethernet import MAX_MTU_SIZE_IN_BYTES
