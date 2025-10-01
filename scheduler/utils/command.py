@@ -23,7 +23,8 @@ def parse_args():
     parser.add_argument("-sq", "--scheduled_queues", action="store", required=False, default=7)
     parser.add_argument("-tq", "--total_queues", required=False, default=8)
 
-    # parser.add_argument("period", action="store", help="Period duration of streams")
+    # subparsers = parser.add_subparsers()
+    # parser_graciunias = subparsers.add_parser('gracunias')
 
     return parser.parse_args()
 

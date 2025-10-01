@@ -1,5 +1,6 @@
 import z3
 
+import math
 from typing import Sequence
 
 from .business import Network, Stream
@@ -50,10 +51,24 @@ class Scheduler:
                         stream2_frame_transmission_duration_in_macroticks = (stream2.length / link_stream2.speed) / link_stream2.macrotick
                         stream1_frame_transmission_duration_in_macroticks = (stream1.length / link_stream1.speed) / link_stream1.macrotick
                         
-                        self.solver.add(z3.Or(
-                            self.frame_variable_dict[stream1][link_stream1]["offset"] >= self.frame_variable_dict[stream2][link_stream2]["offset"] + stream2_frame_transmission_duration_in_macroticks,
-                            self.frame_variable_dict[stream2][link_stream2]["offset"] >= self.frame_variable_dict[stream1][link_stream1]["offset"] + stream1_frame_transmission_duration_in_macroticks
-                        ))
+                        stream2_period_in_macroticks = stream2.period / link_stream2.macrotick
+                        stream1_period_in_macroticks = stream1.period / link_stream1.macrotick
+
+                        hyperperiod_stream1_stream2 = math.lcm(stream2.deadline, stream1.deadline)
+
+                        for stream1_i in range(int(hyperperiod_stream1_stream2 / stream1.period)):
+                            for stream2_i in range(int(hyperperiod_stream1_stream2 / stream2.period)):
+
+                                self.solver.add(z3.Or(
+                                    self.frame_variable_dict[stream1][link_stream1]["offset"] + stream1_i * stream1_period_in_macroticks
+                                    >= 
+                                    self.frame_variable_dict[stream2][link_stream2]["offset"] + stream2_i * stream2_period_in_macroticks + stream2_frame_transmission_duration_in_macroticks,
+
+
+                                    self.frame_variable_dict[stream2][link_stream2]["offset"] + stream2_i * stream2_period_in_macroticks
+                                    >= 
+                                    self.frame_variable_dict[stream1][link_stream1]["offset"] + stream1_i * stream1_period_in_macroticks + stream1_frame_transmission_duration_in_macroticks
+                                ))
 
     def add_stream_transmission_constraints(self, streams):
         for stream in streams:
@@ -86,11 +101,25 @@ class Scheduler:
                         previous_link_stream1 = stream1.path[link_idx_stream1 - 1]
                         previous_link_stream2 = stream2.path[link_idx_stream2 - 1]
 
-                        self.solver.add(z3.Or(
-                            self.frame_variable_dict[stream1][link_stream1]["offset"] * link_stream1.macrotick <= self.frame_variable_dict[stream2][previous_link_stream2]["offset"] * previous_link_stream2.macrotick + previous_link_stream2.delay,
-                            self.frame_variable_dict[stream2][link_stream2]["offset"] * link_stream2.macrotick <= self.frame_variable_dict[stream1][previous_link_stream1]["offset"] * previous_link_stream1.macrotick + previous_link_stream1.delay,
-                            self.frame_variable_dict[stream1][link_stream1]["queue"] != self.frame_variable_dict[stream2][link_stream2]["queue"]
-                        ))
+                        hyperperiod_stream1_stream2 = math.lcm(stream2.deadline, stream1.deadline)
+
+                        for stream1_i in range(int(hyperperiod_stream1_stream2 / stream1.period)):
+                            for stream2_i in range(int(hyperperiod_stream1_stream2 / stream2.period)):
+
+                                # FIXME: theta for time precision
+                                self.solver.add(z3.Or(
+                                    self.frame_variable_dict[stream1][link_stream1]["offset"] * link_stream1.macrotick + stream1_i * stream1.period
+                                    <= 
+                                    self.frame_variable_dict[stream2][previous_link_stream2]["offset"] * previous_link_stream2.macrotick + stream2_i * stream2.period + previous_link_stream2.delay,
+
+                                    self.frame_variable_dict[stream2][link_stream2]["offset"] * link_stream2.macrotick + stream2_i * stream2.period
+                                    <= 
+                                    self.frame_variable_dict[stream1][previous_link_stream1]["offset"] * previous_link_stream1.macrotick + stream1_i * stream1.period + previous_link_stream1.delay,
+
+                                    self.frame_variable_dict[stream1][link_stream1]["queue"] 
+                                    != 
+                                    self.frame_variable_dict[stream2][link_stream2]["queue"]
+                                ))
 
     def add_queue_constraints(self, streams, no_retagging=False):
         for stream in streams:
@@ -104,6 +133,7 @@ class Scheduler:
                 
     def viz_streams_as_gantt(self, streams):
         import plotly.figure_factory as ff
+        import plotly.express as px
         import pandas as pd
         import random
 
@@ -112,21 +142,30 @@ class Scheduler:
         for stream in streams:
             for link in stream.path:
                 frame_transmission_length = stream.length / link.speed
-                df.append(dict(Task=link.__repr__(), Start=self.solver.model()[self.frame_variable_dict[stream][link]["offset"]].as_long(), Finish=self.solver.model()[self.frame_variable_dict[stream][link]["offset"]].as_long()+frame_transmission_length, Resource=stream.name))
+                task_str = link.__str__()
+                df.append(dict(Task=str(task_str), Start=self.solver.model()[self.frame_variable_dict[stream][link]["offset"]].as_long(), Finish=self.solver.model()[self.frame_variable_dict[stream][link]["offset"]].as_long()+frame_transmission_length, Resource=stream.name))
 
         df = pd.DataFrame(df)
-        all_the_colors = list((x,y,z) for x in range(0, 256, 10) for y in range(0, 256, 10) for z in range(0, 256, 10))
+        all_the_colors = list((x,y,z) for x in range(0, 256, 20) for y in range(0, 256, 20) for z in range(0, 256, 20))
         colors = [f"rgb({random.choice(all_the_colors)})" for _ in df.Resource.unique()]
-        fig = ff.create_gantt(df, colors=colors, index_col="Resource", show_colorbar=True)
+        fig = ff.create_gantt(df, colors=colors, index_col="Resource", show_colorbar=True, group_tasks=True)
+        #fig = px.timeline(df, x_start="Start", x_end="Finish", y="Task")
+        #fig.select_yaxes(selector="Task")
         fig.update_layout(xaxis_type="linear")
         fig.show()
         
     def schedule(self, streams: Sequence[Stream]):
         print(self.network)
         
+        deadlines = []
         for stream in streams:
             print(stream.name + ":" + str(stream.path) + ", deadline=" + str(stream.deadline) + ", period=" + str(stream.period))
-        
+            deadlines.append(stream.deadline)    
+    
+        import math
+        self.streams_lcm = math.lcm(*deadlines)
+
+
         self.generate_frame_variables(streams)
 
         self.add_frame_constraints(streams)

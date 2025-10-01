@@ -5,17 +5,10 @@ from typing import Sequence
 from ..business import Stream, Network
 from ..constants import MAX_MTU_SIZE_IN_BYTES
 
-def generate_streams(count: int, periods: Sequence[int], network: Network, frame_counts: Sequence[int]) -> Sequence[Stream]:
-    # TODO: frame_counts and periods not used, currently
-    assert len(periods) == count
-    assert len(frame_counts) == count
-
-    # TODO: so generates same streams for same network
+def generate_streams(count: int, network: Network) -> Sequence[Stream]:
+    # FIXME: generates same streams for same network
     random.seed(1)
 
-    # streams need atleast two links
-
-    # TODO: network model change => include differentation between ES and SW?
     streams = []
     current_idx = 0
     while len(streams) < count:
@@ -32,12 +25,18 @@ def generate_streams(count: int, periods: Sequence[int], network: Network, frame
                 current_link = link
 
             # heuristic...
-            deadline += 1.5 * (MAX_MTU_SIZE_IN_BYTES / link.speed + link.delay)
+            deadline += (MAX_MTU_SIZE_IN_BYTES / link.speed + link.delay) * 0.66
+            
 
         if len(path) < 2:
             continue
 
+        # hyperperiod heuristic...
+        hyperperiod_multiple = random.sample([x*2 for x in range(1, 3)], 1)[0]
+        deadline *= int(hyperperiod_multiple)
+
         stream_name = "stream"+str(current_idx)
+        # FIXME: make streams with more than one frame
         streams.append(Stream(stream_name, MAX_MTU_SIZE_IN_BYTES, path, int(deadline), int(deadline)))
         current_idx += 1
 
