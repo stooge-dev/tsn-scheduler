@@ -15,6 +15,7 @@ def generate_streams(count: int, network: Network) -> Sequence[Stream]:
         first_link_idx = random.randrange(0, len(network.links) - 1)
         first_link = network.links[first_link_idx]
 
+        # TODO: path should not contain links that go backwards, e.g. E to D, D to E
         path = [first_link]
         current_link = first_link
         deadline = 0
