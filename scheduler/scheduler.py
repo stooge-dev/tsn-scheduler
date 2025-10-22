@@ -12,30 +12,24 @@ class Scheduler:
         self.solver = z3.Solver()
         self.configure_solver()
         self.frame_variable_dict = {}
+        self.frame_count = {}
 
     def configure_solver(self):
         self.solver.set("unsat_core", True)
         # solver.set("smt.core.minimize", "true")
-
-    def generate_frame_variables(self, streams):
-        # only one frame per stream is currently assumed
-        # AND Li == s.L
-        for stream in streams:
-            self.frame_variable_dict.setdefault(stream, {})
-            for link in stream.path:
-                self.frame_variable_dict[stream].setdefault(link, {})
-                self.frame_variable_dict[stream][link]["offset"] = z3.Int('frame_offset_' + stream.name + "_link_" + link.src.name + "-" + link.dst.name)
-                self.frame_variable_dict[stream][link]["queue"] = z3.Int('stream_queue_' + stream.name + "_link_" + link.src.name + "-" + link.dst.name)
-
+        
     def add_frame_constraints(self, streams):
         for stream in streams:
             for link in stream.path:
-                frame_period_in_macroticks = stream.period / link.macrotick
+                for current_frame in range(self.frame_count[stream]):
+                    frame_period_in_macroticks = stream.period / link.macrotick
 
-                # i don't need todo (stream.length / (link.speed * 1000 * 1000)) / 1000 / 1000
-                # 100 Mbytes per second == 100 bytes per microsecond
-                frame_transmission_duration_in_macroticks = (stream.length / link.speed) / link.macrotick
-                self.solver.add(z3.And(self.frame_variable_dict[stream][link]["offset"] >= 0, self.frame_variable_dict[stream][link]["offset"] <= frame_period_in_macroticks - frame_transmission_duration_in_macroticks))
+                    # i don't need todo (stream.length / (link.speed * 1000 * 1000)) / 1000 / 1000
+                    # 100 Mbytes per second == 100 bytes per microsecond
+                    frame_transmission_duration_in_macroticks = (stream.length / link.speed) / link.macrotick
+                    self.solver.add(z3.And(self.frame_variable_dict[stream][link][current_frame]["offset"] >= current_frame * frame_period_in_macroticks, 
+                                           
+                                           self.frame_variable_dict[stream][link][current_frame]["offset"] <= current_frame * frame_period_in_macroticks + frame_period_in_macroticks - frame_transmission_duration_in_macroticks))
 
     def add_link_constraints(self, streams):
         for stream1 in streams:
@@ -47,42 +41,46 @@ class Scheduler:
                     for link_stream2 in stream2.path:
                         if link_stream1 != link_stream2:
                             continue
-                            
-                        stream2_frame_transmission_duration_in_macroticks = (stream2.length / link_stream2.speed) / link_stream2.macrotick
-                        stream1_frame_transmission_duration_in_macroticks = (stream1.length / link_stream1.speed) / link_stream1.macrotick
                         
-                        stream2_period_in_macroticks = stream2.period / link_stream2.macrotick
-                        stream1_period_in_macroticks = stream1.period / link_stream1.macrotick
+                        for current_frame_stream1 in range(self.frame_count[stream1]):
+                            for current_frame_stream2 in range(self.frame_count[stream2]):
+                                stream2_frame_transmission_duration_in_macroticks = (stream2.length / link_stream2.speed) / link_stream2.macrotick
+                                stream1_frame_transmission_duration_in_macroticks = (stream1.length / link_stream1.speed) / link_stream1.macrotick
+                                
+                                stream2_period_in_macroticks = stream2.period / link_stream2.macrotick
+                                stream1_period_in_macroticks = stream1.period / link_stream1.macrotick
 
-                        hyperperiod_stream1_stream2 = math.lcm(stream2.deadline, stream1.deadline)
+                                hyperperiod_stream1_stream2 = math.lcm(stream2.deadline, stream1.deadline)
 
-                        for stream1_i in range(int(hyperperiod_stream1_stream2 / stream1.period)):
-                            for stream2_i in range(int(hyperperiod_stream1_stream2 / stream2.period)):
+                                for stream1_i in range(int(hyperperiod_stream1_stream2 / stream1.period)):
+                                    for stream2_i in range(int(hyperperiod_stream1_stream2 / stream2.period)):
 
-                                self.solver.add(z3.Or(
-                                    self.frame_variable_dict[stream1][link_stream1]["offset"] + stream1_i * stream1_period_in_macroticks
-                                    >= 
-                                    self.frame_variable_dict[stream2][link_stream2]["offset"] + stream2_i * stream2_period_in_macroticks + stream2_frame_transmission_duration_in_macroticks,
+                                        self.solver.add(z3.Or(
+                                            self.frame_variable_dict[stream1][link_stream1][current_frame_stream1]["offset"] + stream1_i * stream1_period_in_macroticks
+                                            >= 
+                                            self.frame_variable_dict[stream2][link_stream2][current_frame_stream2]["offset"] + stream2_i * stream2_period_in_macroticks + stream2_frame_transmission_duration_in_macroticks,
 
 
-                                    self.frame_variable_dict[stream2][link_stream2]["offset"] + stream2_i * stream2_period_in_macroticks
-                                    >= 
-                                    self.frame_variable_dict[stream1][link_stream1]["offset"] + stream1_i * stream1_period_in_macroticks + stream1_frame_transmission_duration_in_macroticks
-                                ))
+                                            self.frame_variable_dict[stream2][link_stream2][current_frame_stream2]["offset"] + stream2_i * stream2_period_in_macroticks
+                                            >= 
+                                            self.frame_variable_dict[stream1][link_stream1][current_frame_stream1]["offset"] + stream1_i * stream1_period_in_macroticks + stream1_frame_transmission_duration_in_macroticks
+                                        ))
 
     def add_stream_transmission_constraints(self, streams):
         for stream in streams:
             for (link1, link2) in stream.adjacent_link_pairs():
-                # TODO: pheta for time precision
-                frame_transmission_duration_in_macroticks = int((stream.length / link1.speed) / link1.macrotick)
-                self.solver.add(self.frame_variable_dict[stream][link2]["offset"] * link2.macrotick - link1.delay >= (self.frame_variable_dict[stream][link1]["offset"] + frame_transmission_duration_in_macroticks) * link1.macrotick)
+                for current_frame in range(self.frame_count[stream]):
+                    # TODO: pheta for time precision
+                    frame_transmission_duration_in_macroticks = int((stream.length / link1.speed) / link1.macrotick)
+                    self.solver.add(self.frame_variable_dict[stream][link2][current_frame]["offset"] * link2.macrotick - link1.delay >= (self.frame_variable_dict[stream][link1][current_frame]["offset"] + frame_transmission_duration_in_macroticks) * link1.macrotick)
           
     def add_end_to_end_constraints(self, streams):
         for stream in streams:
-            src = stream.src()
-            dst = stream.dst()
-            frame_transmission_duration_in_macroticks = (stream.length / dst.speed) / dst.macrotick
-            self.solver.add(src.macrotick * self.frame_variable_dict[stream][src]["offset"] + stream.deadline >= dst.macrotick * self.frame_variable_dict[stream][dst]["offset"] + frame_transmission_duration_in_macroticks)
+            for current_frame in range(self.frame_count[stream]):
+                src = stream.src()
+                dst = stream.dst()
+                frame_transmission_duration_in_macroticks = (stream.length / dst.speed) / dst.macrotick
+                self.solver.add(src.macrotick * self.frame_variable_dict[stream][src][current_frame]["offset"] + stream.deadline >= dst.macrotick * self.frame_variable_dict[stream][dst][current_frame]["offset"] + frame_transmission_duration_in_macroticks)
 
     def add_stream_isolation_constraints(self, streams):
         for stream1 in streams:
@@ -105,21 +103,23 @@ class Scheduler:
 
                         for stream1_i in range(int(hyperperiod_stream1_stream2 / stream1.period)):
                             for stream2_i in range(int(hyperperiod_stream1_stream2 / stream2.period)):
+                                for current_frame_stream1 in range(self.frame_count[stream1]):
+                                    for current_frame_stream2 in range(self.frame_count[stream2]):
 
-                                # FIXME: theta for time precision
-                                self.solver.add(z3.Or(
-                                    self.frame_variable_dict[stream1][link_stream1]["offset"] * link_stream1.macrotick + stream1_i * stream1.period
-                                    <= 
-                                    self.frame_variable_dict[stream2][previous_link_stream2]["offset"] * previous_link_stream2.macrotick + stream2_i * stream2.period + previous_link_stream2.delay,
+                                        # FIXME: theta for time precision
+                                        self.solver.add(z3.Or(
+                                            self.frame_variable_dict[stream1][link_stream1][current_frame_stream1]["offset"] * link_stream1.macrotick + stream1_i * stream1.period
+                                            <= 
+                                            self.frame_variable_dict[stream2][previous_link_stream2][current_frame_stream2]["offset"] * previous_link_stream2.macrotick + stream2_i * stream2.period + previous_link_stream2.delay,
 
-                                    self.frame_variable_dict[stream2][link_stream2]["offset"] * link_stream2.macrotick + stream2_i * stream2.period
-                                    <= 
-                                    self.frame_variable_dict[stream1][previous_link_stream1]["offset"] * previous_link_stream1.macrotick + stream1_i * stream1.period + previous_link_stream1.delay,
+                                            self.frame_variable_dict[stream2][link_stream2][current_frame_stream2]["offset"] * link_stream2.macrotick + stream2_i * stream2.period
+                                            <= 
+                                            self.frame_variable_dict[stream1][previous_link_stream1][current_frame_stream1]["offset"] * previous_link_stream1.macrotick + stream1_i * stream1.period + previous_link_stream1.delay,
 
-                                    self.frame_variable_dict[stream1][link_stream1]["queue"] 
-                                    != 
-                                    self.frame_variable_dict[stream2][link_stream2]["queue"]
-                                ))
+                                            self.frame_variable_dict[stream1][link_stream1]["queue"] 
+                                            != 
+                                            self.frame_variable_dict[stream2][link_stream2]["queue"]
+                                        ))
 
     def add_queue_constraints(self, streams, no_retagging=False):
         for stream in streams:
@@ -141,9 +141,10 @@ class Scheduler:
 
         for stream in streams:
             for link in stream.path:
-                frame_transmission_length = stream.length / link.speed
-                task_str = link.__str__()
-                df.append(dict(Task=str(task_str), Start=self.solver.model()[self.frame_variable_dict[stream][link]["offset"]].as_long(), Finish=self.solver.model()[self.frame_variable_dict[stream][link]["offset"]].as_long()+frame_transmission_length, Resource=stream.name))
+                for current_frame in range(self.frame_count[stream]):
+                    frame_transmission_length = stream.length / link.speed
+                    task_str = link.__str__()
+                    df.append(dict(Task=str(task_str), Start=self.solver.model()[self.frame_variable_dict[stream][link][current_frame]["offset"]].as_long(), Finish=self.solver.model()[self.frame_variable_dict[stream][link][current_frame]["offset"]].as_long()+frame_transmission_length, Resource=stream.name))
 
         df = pd.DataFrame(df)
         all_the_colors = list((x,y,z) for x in range(0, 256, 20) for y in range(0, 256, 20) for z in range(0, 256, 20))
@@ -156,17 +157,29 @@ class Scheduler:
         
     def schedule(self, streams: Sequence[Stream]):
         print(self.network)
+        print("[~] Constraining...")
         
-        deadlines = []
+        periods = []
         for stream in streams:
             print(stream.name + ":" + str(stream.path) + ", deadline=" + str(stream.deadline) + ", period=" + str(stream.period))
-            deadlines.append(stream.deadline)    
+            periods.append(stream.period)    
     
         import math
-        self.streams_lcm = math.lcm(*deadlines)
+        self.streams_hyperperiod = math.lcm(*periods)
 
+        # only one frame per stream is currently assumed
+        # AND Li == s.L
+        for stream in streams:
+            self.frame_count[stream] = int(self.streams_hyperperiod / stream.period)
 
-        self.generate_frame_variables(streams)
+            self.frame_variable_dict.setdefault(stream, {})
+            for current_frame in range(self.frame_count[stream]):
+                for link in stream.path:
+                    self.frame_variable_dict[stream].setdefault(link, {})
+                    self.frame_variable_dict[stream][link].setdefault(current_frame, {})
+                    self.frame_variable_dict[stream][link][current_frame]["offset"] = z3.Int('frame_' + str(current_frame) + '_offset_' + stream.name + "_link_" + link.src.name + "-" + link.dst.name)
+                    self.frame_variable_dict[stream][link]["queue"] = z3.Int('stream_queue_' + stream.name + "_link_" + link.src.name + "-" + link.dst.name)
+
 
         self.add_frame_constraints(streams)
         self.add_link_constraints(streams)

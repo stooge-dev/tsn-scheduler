@@ -16,7 +16,7 @@ best_effort_queues = total_queues - scheduled_queues
 
 network = read_network_from_csv(args.network_filename)
 #streams = read_streams_from_csv(args.streams_filename, network)
-stream_count = 35
+stream_count = 15
 streams = generate_streams(stream_count, network)
 
 scheduler = Scheduler(network, scheduled_queues)
