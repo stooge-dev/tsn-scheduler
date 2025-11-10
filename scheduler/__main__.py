@@ -5,7 +5,7 @@ PUBLIC SERVICE ANNOUNCMENT: all times are in microsecond
 """
 
 from .utils import parse_args, read_network_from_csv, read_streams_from_csv, generate_streams
-from .scheduler import Scheduler
+from .schedule import GracuniasScheduler
 
 args = parse_args()
 
@@ -19,7 +19,7 @@ network = read_network_from_csv(args.network_filename)
 stream_count = 15
 streams = generate_streams(stream_count, network)
 
-scheduler = Scheduler(network, scheduled_queues)
+scheduler = GracuniasScheduler(network, scheduled_queues)
 scheduler.schedule(streams)
 
 # TODO: make a benchmark generator?

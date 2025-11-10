@@ -3,9 +3,9 @@ import z3
 import math
 from typing import Sequence
 
-from .business import Network, Stream
+from ..business import Network, Stream
 
-class Scheduler:
+class GracuniasScheduler:
     def __init__(self, network: Network, scheduled_queues):
         self.network = network
         self.queues_available = scheduled_queues
