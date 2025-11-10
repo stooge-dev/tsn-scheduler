@@ -9,7 +9,7 @@ from typing import Sequence
 from ..business import Network, Stream
 
 class GracuniasScheduler:
-    def __init__(self, network: Network, scheduled_queues):
+    def __init__(self, network: Network, scheduled_queues, predefined_offsets={}):
         self.network = network
         self.queues_available = scheduled_queues
         self.configure_solver()
@@ -124,13 +124,13 @@ class GracuniasScheduler:
                                             self.frame_variable_dict[stream2][link_stream2]["queue"]
                                         ))
 
-    def add_queue_constraints(self, streams, no_retagging=False):
+    def add_queue_constraints(self, streams, retagging=True):
         for stream in streams:
             for link_idx, link in enumerate(stream.path):
 
                 self.solver.add(z3.And(self.frame_variable_dict[stream][link]["queue"] >= 0, self.frame_variable_dict[stream][link]["queue"] <= self.queues_available))
                 
-                if link_idx > 0 and no_retagging:
+                if link_idx > 0 and not retagging:
                     previous_link = stream.path[link_idx - 1]
                     self.solver.add(self.frame_variable_dict[stream][link]["queue"] == self.frame_variable_dict[stream][previous_link]["queue"])
                 

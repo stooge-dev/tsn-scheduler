@@ -6,9 +6,7 @@ from ..business import Network
 class HermesScheduler:
     def __init__(self, network: Network, scheduled_queues):
         self.network = network
-
         
     def generate_frames_on_links(self):
         pass
-
         

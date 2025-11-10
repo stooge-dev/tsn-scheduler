@@ -50,3 +50,13 @@ def read_streams_from_csv(filename: str, network: Network) -> Sequence[Stream]:
             streams.append(stream)
 
         return streams
+    
+def write_streams_to_csv(filename: str, streams: Sequence[Stream]):
+    with open(filename) as csvfile:
+        fieldnames = ['name', 'length', 'deadline', 'path', 'period']
+        streams_writer = csv.DictWriter(csvfile, delimiter=',', fieldnames=fieldnames)
+
+        for stream in streams:
+            # Path needs to be formated.
+            stream_dict = {'name': stream.name, 'length': stream.length, 'deadline': stream.deadline, 'path': stream.path, 'period': stream.period}
+            streams_writer.writerow(stream_dict)

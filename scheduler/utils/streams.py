@@ -5,9 +5,8 @@ from typing import Sequence
 from ..business import Stream, Network
 from ..constants import MAX_MTU_SIZE_IN_BYTES
 
-def generate_streams(count: int, network: Network) -> Sequence[Stream]:
-    # FIXME: generates same streams for same network
-    random.seed(1)
+def generate_streams(count: int, network: Network, seed: int) -> Sequence[Stream]:
+    random.seed(seed)
 
     streams = []
     current_idx = 0
