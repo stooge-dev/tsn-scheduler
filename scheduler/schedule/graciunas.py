@@ -12,12 +12,12 @@ class GracuniasScheduler:
     def __init__(self, network: Network, scheduled_queues):
         self.network = network
         self.queues_available = scheduled_queues
-        self.solver = z3.Solver()
         self.configure_solver()
         self.frame_variable_dict = {}
         self.frame_count = {}
 
     def configure_solver(self):
+        self.solver = z3.Solver()
         self.solver.set("unsat_core", True)
         # solver.set("smt.core.minimize", "true")
         

@@ -1,1 +1,2 @@
-from .gracunias import GracuniasScheduler
+from .graciunas import GracuniasScheduler
+from .hermes import HermesScheduler
