@@ -16,6 +16,7 @@ if args.command == "schedule":
     total_queues = args.total_queues
     best_effort_queues = total_queues - scheduled_queues
 
+    # TODO: change to read from csv again, when generating streams command is ready
     network = read_network_from_csv(args.network_filename)
     #streams = read_streams_from_csv(args.streams_filename, network)
     stream_count = 15

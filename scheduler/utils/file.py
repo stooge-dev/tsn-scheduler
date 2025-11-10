@@ -57,6 +57,6 @@ def write_streams_to_csv(filename: str, streams: Sequence[Stream]):
         streams_writer = csv.DictWriter(csvfile, delimiter=',', fieldnames=fieldnames)
 
         for stream in streams:
-            # Path needs to be formated.
+            # TODO: Path needs to be formated.
             stream_dict = {'name': stream.name, 'length': stream.length, 'deadline': stream.deadline, 'path': stream.path, 'period': stream.period}
             streams_writer.writerow(stream_dict)
