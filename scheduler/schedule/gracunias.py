@@ -1,3 +1,6 @@
+# Graciunas
+# Graciunas et. al 2016
+# Scheduling Real-Time Communication in IEEE 802.1Qbv Time Sensitive Networks
 import z3
 
 import math
