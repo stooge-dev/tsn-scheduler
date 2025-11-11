@@ -1,4 +1,4 @@
-from ..utils import read_network_from_csv, read_streams_from_csv
+from ..file import  read_network_from_csv, read_streams_from_csv
 from ..specific import GracuniasScheduler
 
 """
