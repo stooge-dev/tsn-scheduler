@@ -36,12 +36,14 @@ class ArgumentParser:
         offset_file_group.add_argument("-lof", "--load_offset_file", action="store", required=False, default=None)
 
         self.generate_streams_parser = main_commands.add_parser("streams")
-        self.generate_streams_parser.add_argument("-c", "--count", action="store", required=True)
+        self.generate_streams_parser.add_argument("-c", "--count", action="store", type=int, required=True)
 
         self.generate_streams_parser.add_argument("-nf", "--network_filename", action="store", required=True, help="Filename of network csv")
         self.generate_streams_parser.add_argument("-st", "--save_to", action="store", required=True)
 
-        self.generate_streams_parser.add_argument("--seed", action="store", required=False, default=1)
+        self.generate_streams_parser.add_argument("--seed", action="store", type=int, required=False, default=1)
+
+        self.api_parser = main_commands.add_parser("api")
 
     def add_scheduler_command(self, schedulername: str):
         if self.schedule_commands == None:

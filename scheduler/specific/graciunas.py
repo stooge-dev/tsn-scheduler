@@ -6,7 +6,7 @@ import z3
 import math
 from typing import Sequence
 
-from ..business import Network, Stream
+from ..business import Network, Stream, Offset
 
 class GracuniasScheduler:
     def __init__(self, network: Network, scheduled_queues, predefined_offsets={}):
@@ -204,7 +204,17 @@ class GracuniasScheduler:
             print("[-] Unsatisfiable schedule parameter")
             print(self.solver.unsat_core())
 
+        offsets = []
+        for stream in streams:
+            for link in stream.path:
+                for current_frame in range(self.frame_count[stream]):
+                    offset_int = self.solver.model()[self.frame_variable_dict[stream][link][current_frame]["offset"]].as_long()
+                    offset = Offset(link=link, stream_name=stream.name, frame_idx=current_frame, value=offset_int)
+                    offsets.append(offset)
+
+        return offsets
         # TODO: return GCL
+
 
     def reschedule(self, streams: Sequence[Stream], changed_stream: Stream):
         print("[~] Resolving...")
