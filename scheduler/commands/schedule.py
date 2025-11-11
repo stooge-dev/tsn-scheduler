@@ -1,4 +1,4 @@
-from ..file import  read_network_from_csv, read_streams_from_csv
+from ..file import  read_network_from_csv, read_streams_from_csv, write_offsets_to_file, read_offsets_from_file
 from ..specific import GracuniasScheduler
 
 """
@@ -15,19 +15,16 @@ def schedule_command(args):
     streams = read_streams_from_csv(args.streams_filename, network)
 
     if args.method == "graciunas":
+        pre_offsets = []
+        if args.load_offset_file != None:
+            pre_offsets = read_offsets_from_file(args.load_offset_file, network)
+
+        # TODO: give pre_offsets to scheduler
         scheduler = GracuniasScheduler(network, scheduled_queues)
         offsets = scheduler.schedule(streams)
-        for offset in offsets:
-            print(offset.stream_name)
-            print(offset.frame_idx)
-            print(offset.value)
 
         if args.save_offset_file != None:
-            pass
-            # TODO: save
+            write_offsets_to_file(args.save_offset_file, offsets)
 
     elif args.method == "hermes":
         pass
-
-# TODO: generate GCL out of model
-# TODO: visualize the GCL?
