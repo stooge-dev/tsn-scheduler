@@ -1,26 +1,8 @@
-
 from typing import Sequence
 
 from ..business import Network, Node, Stream, Link
 
 import csv
-
-def read_network_from_csv(filename: str) -> Network:
-    with open(filename) as csvfile:
-        linkreader = csv.DictReader(csvfile)
-        
-        links = []
-        for row in linkreader:
-            src = Node(row["src"])
-            dst = Node(row["dst"])
-
-            link = Link(src=src, dst=dst,delay=int(row["delay"]),speed=int(row["speed"]),macrotick=int(row["macrotick"]))
-            links.append(link)
-
-            link = Link(src=dst, dst=src, delay=int(row["delay"]),speed=int(row["speed"]),macrotick=int(row["macrotick"]))
-            links.append(link)
-            
-        return Network(links)
 
 def read_path(string: str, network: Network) -> Sequence[Node]:
     path_links_separator = ";"
@@ -50,3 +32,17 @@ def read_streams_from_csv(filename: str, network: Network) -> Sequence[Stream]:
             streams.append(stream)
 
         return streams
+    
+def write_streams_to_csv(filename: str, streams: Sequence[Stream]):
+    with open(filename, "x") as csvfile:
+        fieldnames = ['name', 'length', 'deadline', 'path', 'period']
+        streams_writer = csv.DictWriter(csvfile, delimiter=',', fieldnames=fieldnames)
+
+        streams_writer.writeheader()
+
+        for stream in streams:
+            path = ""
+            for link in stream.path:
+                path += link.src.name + ":" + link.dst.name + ";"
+            stream_dict = {'name': stream.name, 'length': stream.length, 'deadline': stream.deadline, 'path': path, 'period': stream.period}
+            streams_writer.writerow(stream_dict)
