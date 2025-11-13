@@ -30,9 +30,9 @@ class GracuniasScheduler:
                     # i don't need todo (stream.length / (link.speed * 1000 * 1000)) / 1000 / 1000
                     # 100 Mbytes per second == 100 bytes per microsecond
                     frame_transmission_duration_in_macroticks = (stream.length / link.speed) / link.macrotick
-                    self.solver.add(z3.And(self.frame_variable_dict[stream][link][current_frame]["offset"] >= current_frame * frame_period_in_macroticks, 
+                    self.solver.add(z3.And(self.access_frame_offset_variable(stream, link, current_frame) >= current_frame * frame_period_in_macroticks, 
                                            
-                                           self.frame_variable_dict[stream][link][current_frame]["offset"] <= current_frame * frame_period_in_macroticks + frame_period_in_macroticks - frame_transmission_duration_in_macroticks))
+                                           self.access_frame_offset_variable(stream, link, current_frame) <= current_frame * frame_period_in_macroticks + frame_period_in_macroticks - frame_transmission_duration_in_macroticks))
 
     def add_link_constraints(self, streams):
         for stream1 in streams:
@@ -59,14 +59,14 @@ class GracuniasScheduler:
                                     for stream2_i in range(int(hyperperiod_stream1_stream2 / stream2.period)):
 
                                         self.solver.add(z3.Or(
-                                            self.frame_variable_dict[stream1][link_stream1][current_frame_stream1]["offset"] + stream1_i * stream1_period_in_macroticks
+                                            self.access_frame_offset_variable(stream1, link_stream1, current_frame_stream1) + stream1_i * stream1_period_in_macroticks
                                             >= 
-                                            self.frame_variable_dict[stream2][link_stream2][current_frame_stream2]["offset"] + stream2_i * stream2_period_in_macroticks + stream2_frame_transmission_duration_in_macroticks,
+                                            self.access_frame_offset_variable(stream2, link_stream2, current_frame_stream2) + stream2_i * stream2_period_in_macroticks + stream2_frame_transmission_duration_in_macroticks,
 
 
-                                            self.frame_variable_dict[stream2][link_stream2][current_frame_stream2]["offset"] + stream2_i * stream2_period_in_macroticks
+                                            self.access_frame_offset_variable(stream2, link_stream2, current_frame_stream2) + stream2_i * stream2_period_in_macroticks
                                             >= 
-                                            self.frame_variable_dict[stream1][link_stream1][current_frame_stream1]["offset"] + stream1_i * stream1_period_in_macroticks + stream1_frame_transmission_duration_in_macroticks
+                                            self.access_frame_offset_variable(stream1, link_stream1, current_frame_stream1) + stream1_i * stream1_period_in_macroticks + stream1_frame_transmission_duration_in_macroticks
                                         ))
 
     def add_stream_transmission_constraints(self, streams):
@@ -75,7 +75,7 @@ class GracuniasScheduler:
                 for current_frame in range(self.frame_count[stream]):
                     # TODO: pheta for time precision
                     frame_transmission_duration_in_macroticks = int((stream.length / link1.speed) / link1.macrotick)
-                    self.solver.add(self.frame_variable_dict[stream][link2][current_frame]["offset"] * link2.macrotick - link1.delay >= (self.frame_variable_dict[stream][link1][current_frame]["offset"] + frame_transmission_duration_in_macroticks) * link1.macrotick)
+                    self.solver.add(self.access_frame_offset_variable(stream, link2, current_frame) * link2.macrotick - link1.delay >= (self.access_frame_offset_variable(stream, link1, current_frame) + frame_transmission_duration_in_macroticks) * link1.macrotick)
           
     def add_end_to_end_constraints(self, streams):
         for stream in streams:
@@ -83,7 +83,7 @@ class GracuniasScheduler:
                 src = stream.src()
                 dst = stream.dst()
                 frame_transmission_duration_in_macroticks = (stream.length / dst.speed) / dst.macrotick
-                self.solver.add(src.macrotick * self.frame_variable_dict[stream][src][current_frame]["offset"] + stream.deadline >= dst.macrotick * self.frame_variable_dict[stream][dst][current_frame]["offset"] + frame_transmission_duration_in_macroticks)
+                self.solver.add(src.macrotick * self.access_frame_offset_variable(stream, src, current_frame) + stream.deadline >= dst.macrotick * self.access_frame_offset_variable(stream, dst, current_frame) + frame_transmission_duration_in_macroticks)
 
     def add_stream_isolation_constraints(self, streams):
         for stream1 in streams:
@@ -111,28 +111,29 @@ class GracuniasScheduler:
 
                                         # FIXME: theta for time precision
                                         self.solver.add(z3.Or(
-                                            self.frame_variable_dict[stream1][link_stream1][current_frame_stream1]["offset"] * link_stream1.macrotick + stream1_i * stream1.period
+                                            self.access_frame_offset_variable(stream1, link_stream1, current_frame_stream1) * link_stream1.macrotick + stream1_i * stream1.period
                                             <= 
-                                            self.frame_variable_dict[stream2][previous_link_stream2][current_frame_stream2]["offset"] * previous_link_stream2.macrotick + stream2_i * stream2.period + previous_link_stream2.delay,
+                                            self.access_frame_offset_variable(stream2, previous_link_stream2, current_frame_stream2) * previous_link_stream2.macrotick + stream2_i * stream2.period + previous_link_stream2.delay,
 
-                                            self.frame_variable_dict[stream2][link_stream2][current_frame_stream2]["offset"] * link_stream2.macrotick + stream2_i * stream2.period
+                                            self.access_frame_offset_variable(stream2, link_stream2, current_frame_stream2) * link_stream2.macrotick + stream2_i * stream2.period
                                             <= 
-                                            self.frame_variable_dict[stream1][previous_link_stream1][current_frame_stream1]["offset"] * previous_link_stream1.macrotick + stream1_i * stream1.period + previous_link_stream1.delay,
+                                            
+                                            self.access_frame_offset_variable(stream1, previous_link_stream1, current_frame_stream1) * previous_link_stream1.macrotick + stream1_i * stream1.period + previous_link_stream1.delay,
 
-                                            self.frame_variable_dict[stream1][link_stream1]["queue"] 
+                                            self.frame_variable_dict[stream1.name][str(link_stream1)]["queue"] 
                                             != 
-                                            self.frame_variable_dict[stream2][link_stream2]["queue"]
+                                            self.frame_variable_dict[stream2.name][str(link_stream2)]["queue"]
                                         ))
 
     def add_queue_constraints(self, streams, retagging=True):
         for stream in streams:
             for link_idx, link in enumerate(stream.path):
 
-                self.solver.add(z3.And(self.frame_variable_dict[stream][link]["queue"] >= 0, self.frame_variable_dict[stream][link]["queue"] <= self.queues_available))
+                self.solver.add(z3.And(self.frame_variable_dict[stream.name][str(link)]["queue"] >= 0, self.frame_variable_dict[stream.name][str(link)]["queue"] <= self.queues_available))
                 
                 if link_idx > 0 and not retagging:
                     previous_link = stream.path[link_idx - 1]
-                    self.solver.add(self.frame_variable_dict[stream][link]["queue"] == self.frame_variable_dict[stream][previous_link]["queue"])
+                    self.solver.add(self.frame_variable_dict[stream.name][str(link)]["queue"] == self.frame_variable_dict[stream.name][str(previous_link)]["queue"])
                 
     def viz_streams_as_gantt(self, streams):
         import plotly.figure_factory as ff
@@ -147,7 +148,7 @@ class GracuniasScheduler:
                 for current_frame in range(self.frame_count[stream]):
                     frame_transmission_length = stream.length / link.speed
                     task_str = link.__str__()
-                    df.append(dict(Task=str(task_str), Start=self.solver.model()[self.frame_variable_dict[stream][link][current_frame]["offset"]].as_long(), Finish=self.solver.model()[self.frame_variable_dict[stream][link][current_frame]["offset"]].as_long()+frame_transmission_length, Resource=stream.name))
+                    df.append(dict(Task=str(task_str), Start=self.solver.model()[self.access_frame_offset_variable(stream, link, current_frame)].as_long(), Finish=self.solver.model()[self.frame_variable_dict[stream][link][current_frame]["offset"]].as_long()+frame_transmission_length, Resource=stream.name))
 
         df = pd.DataFrame(df)
         all_the_colors = list((x,y,z) for x in range(0, 256, 20) for y in range(0, 256, 20) for z in range(0, 256, 20))
@@ -157,10 +158,28 @@ class GracuniasScheduler:
         #fig.select_yaxes(selector="Task")
         fig.update_layout(xaxis_type="linear")
         fig.show()
-        
-    def schedule(self, streams: Sequence[Stream]):
+
+    def add_pre_offsets(self, streams, pre_offsets, new_streams):
+        for stream in streams:
+            if stream in new_streams:
+                continue
+
+            for current_frame in range(self.frame_count[stream]):
+                for link in stream.path:
+                    self.solver.add(self.access_frame_offset_variable(stream, link, current_frame) == pre_offsets[stream.name][link][current_frame])
+    
+    def access_frame_offset_variable(self, stream, link, current_frame):
+        return self.frame_variable_dict[stream.name][str(link)][current_frame]["offset"]
+
+    def schedule(self, streams: Sequence[Stream], pre_offsets, new_streams):
         print(self.network)
         print("[~] Constraining...")
+
+        if new_streams != None:
+            for stream in streams:
+                for new_stream in new_streams:
+                    if stream.name == new_stream.name:
+                        streams[streams.index(stream)] = new_stream
         
         periods = []
         for stream in streams:
@@ -175,14 +194,16 @@ class GracuniasScheduler:
         for stream in streams:
             self.frame_count[stream] = int(self.streams_hyperperiod / stream.period)
 
-            self.frame_variable_dict.setdefault(stream, {})
+            self.frame_variable_dict.setdefault(stream.name, {})
             for current_frame in range(self.frame_count[stream]):
                 for link in stream.path:
-                    self.frame_variable_dict[stream].setdefault(link, {})
-                    self.frame_variable_dict[stream][link].setdefault(current_frame, {})
-                    self.frame_variable_dict[stream][link][current_frame]["offset"] = z3.Int('frame_' + str(current_frame) + '_offset_' + stream.name + "_link_" + link.src.name + "-" + link.dst.name)
-                    self.frame_variable_dict[stream][link]["queue"] = z3.Int('stream_queue_' + stream.name + "_link_" + link.src.name + "-" + link.dst.name)
+                    self.frame_variable_dict[stream.name].setdefault(str(link), {})
+                    self.frame_variable_dict[stream.name][str(link)].setdefault(current_frame, {})
+                    self.frame_variable_dict[stream.name][str(link)][current_frame]["offset"] = z3.Int('frame_' + str(current_frame) + '_offset_' + stream.name + "_link_" + link.src.name + "-" + link.dst.name)
+                    self.frame_variable_dict[stream.name][str(link)]["queue"] = z3.Int('stream_queue_' + stream.name + "_link_" + link.src.name + "-" + link.dst.name)
 
+        if pre_offsets != None and new_streams != None:
+            self.add_pre_offsets(streams, pre_offsets, new_streams)
 
         self.add_frame_constraints(streams)
         self.add_link_constraints(streams)
@@ -197,24 +218,26 @@ class GracuniasScheduler:
         print(self.solver.statistics())
         print("")
         if str(check) == "sat":
-            # print(self.solver.model())
-
-            self.viz_streams_as_gantt(streams)
+            offsets = {}
+            for stream in streams:
+                offsets.setdefault(stream.name, {})
+                for link in stream.path:
+                    offsets[stream.name].setdefault(str(link), {})
+                    for current_frame in range(self.frame_count[stream]):
+                        
+                        offset_int = self.solver.model()[self.access_frame_offset_variable(stream, link, current_frame)].as_long()
+                        offsets[stream.name][str(link)][current_frame] = offset_int
+            
+            return offsets
+            # self.viz_streams_as_gantt(streams)
         else:
             print("[-] Unsatisfiable schedule parameter")
             print(self.solver.unsat_core())
+            return None
 
-        offsets = []
-        for stream in streams:
-            for link in stream.path:
-                for current_frame in range(self.frame_count[stream]):
-                    offset_int = self.solver.model()[self.frame_variable_dict[stream][link][current_frame]["offset"]].as_long()
-                    offset = Offset(link=link, stream_name=stream.name, frame_idx=current_frame, value=offset_int)
-                    offsets.append(offset)
+        
 
-        return offsets
-        # TODO: return GCL
-
+        
 
     def reschedule(self, streams: Sequence[Stream], changed_stream: Stream):
         print("[~] Resolving...")

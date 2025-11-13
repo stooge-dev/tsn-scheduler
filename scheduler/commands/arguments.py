@@ -26,12 +26,22 @@ class ArgumentParser:
         self.schedule_command.add_argument("-nf", "--network_filename", action="store", required=True, help="Filename of network csv")
 
         self.schedule_command.add_argument("-sf", "--streams_filename", action="store", required=True, help="Filename of stream csv")
-        self.schedule_command.add_argument("-nsf", "--new_streams_filename", action="store", required=False)
 
         self.schedule_command.add_argument("-sq", "--scheduled_queues", action="store", required=False, default=7)
         self.schedule_command.add_argument("-tq", "--total_queues", action="store", required=False, default=8)
 
-        offset_file_group = self.schedule_command.add_mutually_exclusive_group()
+        self.schedule_command.add_argument("-sof", "--save_offset_file", action="store", required=False, default=None)
+
+        self.reschedule_command = main_commands.add_parser("reschedule")
+        self.reschedule_command.add_argument("-nf", "--network_filename", action="store", required=True, help="Filename of network csv")
+
+        self.reschedule_command.add_argument("-sf", "--streams_filename", action="store", required=True, help="Filename of stream csv")
+        self.reschedule_command.add_argument("-nsf", "--new_streams_filename", action="store", required=False)
+
+        self.reschedule_command.add_argument("-sq", "--scheduled_queues", action="store", required=False, default=7)
+        self.reschedule_command.add_argument("-tq", "--total_queues", action="store", required=False, default=8)
+
+        offset_file_group = self.reschedule_command.add_mutually_exclusive_group()
         offset_file_group.add_argument("-sof", "--save_offset_file", action="store", required=False, default=None)
         offset_file_group.add_argument("-lof", "--load_offset_file", action="store", required=False, default=None)
 

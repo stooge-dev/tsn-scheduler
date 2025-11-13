@@ -1,11 +1,7 @@
 from ..file import  read_network_from_csv, read_streams_from_csv, write_offsets_to_file, read_offsets_from_file
 from ..specific import GracuniasScheduler
 
-"""
-PUBLIC SERVICE ANNOUNCMENT: all times are in microsecond
-"""
-
-def schedule_command(args):
+def reschedule_command(args):
     # TODO: queues for every device are the same currently 
     scheduled_queues = args.scheduled_queues
     total_queues = args.total_queues

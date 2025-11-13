@@ -12,10 +12,10 @@ class Link():
         return self.src == other.src and self.dst == other.dst
     
     def __repr__(self):
-        return self.src.__repr__() + "to" + self.dst.__repr__()
+        return self.src.__repr__() + " to " + self.dst.__repr__()
     
     def __str__(self):
-        return "Link(" + self.src.__repr__() + " - " + self.dst.__repr__() + ")"
+        return "Link(" + self.src.__repr__() + "-" + self.dst.__repr__() + ")"
     
     def __hash__(self):
         return hash(self.__repr__())

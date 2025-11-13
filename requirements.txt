@@ -1,3 +1,4 @@
+bottle==0.13.4
 narwhals==2.5.0
 numpy==2.3.3
 packaging==25.0

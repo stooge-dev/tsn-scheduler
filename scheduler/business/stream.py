@@ -34,6 +34,9 @@ class Stream():
     def __str__(self):
         return "Stream(" + self.name + ")"
     
+    def __hash__(self):
+        return hash(self.name)
+    
 from abc import ABC, abstractmethod
 
 class StreamDependencyGraph(ABC):

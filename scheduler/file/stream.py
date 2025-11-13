@@ -12,8 +12,9 @@ def read_path(string: str, network: Network) -> Sequence[Node]:
     for link_str in path_str:
         path_nodes_separator = ":"
         path_nodes = link_str.split(path_nodes_separator)
-        idx_link = network.links.index(Link(Node(path_nodes[0]), Node(path_nodes[1]), 1,1,1))
-        path.append(network.links[idx_link])
+        for link in network.links:
+            if link.src.name == path_nodes[0] and link.dst.name == path_nodes[1] and link not in path:
+                path.append(link)
 
     return path
 
