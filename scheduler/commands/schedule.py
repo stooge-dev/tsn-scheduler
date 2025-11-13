@@ -1,5 +1,5 @@
-from ..file import  read_network_from_csv, read_streams_from_csv, write_offsets_to_file, read_offsets_from_file
-from ..specific import GracuniasScheduler
+from scheduler.file import  read_network_from_csv, read_streams_from_csv, write_offsets_to_file, read_offsets_from_file
+from scheduler.specific import GracuniasScheduler
 
 """
 PUBLIC SERVICE ANNOUNCMENT: all times are in microsecond
@@ -15,17 +15,9 @@ def schedule_command(args):
     streams = read_streams_from_csv(args.streams_filename, network)
 
     if args.method == "graciunas":
-        pre_offsets = None
-        if args.load_offset_file != None:
-            pre_offsets = read_offsets_from_file(args.load_offset_file, network)
-
-        new_streams = None
-        if args.new_streams_filename != None:
-            new_streams = read_streams_from_csv(args.new_streams_filename, network)
-
         # TODO: give pre_offsets to scheduler
         scheduler = GracuniasScheduler(network, scheduled_queues)
-        offsets = scheduler.schedule(streams, pre_offsets, new_streams)
+        offsets = scheduler.schedule(streams, None, None)
 
         if offsets == None:
             print("[-] No offsets scheduled")

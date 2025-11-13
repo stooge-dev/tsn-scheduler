@@ -1,5 +1,5 @@
-from ..file import  read_network_from_csv, read_streams_from_csv, write_offsets_to_file, read_offsets_from_file
-from ..specific import GracuniasScheduler
+from scheduler.file import  read_network_from_csv, read_streams_from_csv, write_offsets_to_file, read_offsets_from_file
+from scheduler.specific import GracuniasScheduler
 
 def reschedule_command(args):
     # TODO: queues for every device are the same currently 

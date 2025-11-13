@@ -1,6 +1,6 @@
 from typing import Sequence
 
-from ..business import Network, Node, Stream, Link
+from scheduler.business import Network, Node, Stream
 
 import csv
 

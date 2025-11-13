@@ -2,9 +2,9 @@ import random
 
 from typing import Sequence
 
-from ..file import write_streams_to_csv, read_network_from_csv
-from ..business import Stream, Network
-from ..constants import MAX_MTU_SIZE_IN_BYTES
+from scheduler.file import write_streams_to_csv, read_network_from_csv
+from scheduler.business import Stream, Network
+from scheduler.constants import MAX_MTU_SIZE_IN_BYTES
 
 def streams_command(args):
     network = read_network_from_csv(args.network_filename)

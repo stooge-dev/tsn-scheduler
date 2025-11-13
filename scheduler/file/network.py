@@ -1,4 +1,4 @@
-from ..business import Network, Node,  Link
+from scheduler.business import Network, Node,  Link
 
 import csv
 

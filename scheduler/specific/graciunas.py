@@ -6,7 +6,7 @@ import z3
 import math
 from typing import Sequence
 
-from ..business import Network, Stream, Offset
+from scheduler.business import Network, Stream, Offset
 
 class GracuniasScheduler:
     def __init__(self, network: Network, scheduled_queues, predefined_offsets={}):
