@@ -17,6 +17,6 @@ if __name__ == "__main__":
     # Other questions?
 
     # Can I use this approach easily with other ground algorithms for scheduling, like HERMES?
-    
 
+    
     ...
