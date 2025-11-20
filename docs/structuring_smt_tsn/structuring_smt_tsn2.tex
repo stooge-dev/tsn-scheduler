@@ -1,0 +1,54 @@
+\documentclass{article}
+\title{Ideas for decomposing the TSN scheduling problem}
+
+\begin{document}
+	
+\maketitle
+	
+\section{Introduction}
+Goal: Paper presents concepts for structuring the specific TSN (re)scheduling problem for SMT general solvers, possibly increasing performance.
+
+\section{Decomposing TSN problem}
+\subsection{Incremental Scheduling}
+\cite{vlk_large-scale_2022} implement a heuristic for scheduling TSN networks. We want to examine if it is possible to make their heuristic incremental.
+
+\cite{steiner_evaluation_2010} proposed a backtracking algorithm for incremental SMT solving of a TSN schedule. They select a certain subset of frames to be scheduled via the SMT scheduler, when a schedule can be found they continue by selecting a new subset of frames to be scheduled, if not they backtrack.
+
+Backtracking works by selecting and removing frames which have already been scheduled, decreasing the already scheduled frames again. If the subset of frames to be scheduled exceeds a certain threshold or a timeout is reached scheduling is aborted.
+
+We propose different ideas to build upon this idea of creating a subset of frames to be scheduled.
+
+The selection of frames to scheduled Steiner et al. proposed is random. As we have application-level knowledge of streams in a TSN network, we can define different selection strategies.
+
+The unit to be selected for scheduling by Steiner et al. is frames, we propose that also experimenting with streams, frames and selecting all frames on a port to be scheduled, could improve scheduling times.
+
+\subsubsection{Conflict-driven}
+We want to examine if selecting frames by different conflict measures can decrease scheduling times with SMT.
+
+Streams will be selected on the basis of how many frames of this stream interact with other frames of different streams, which shows how many dependencies are between streams. We want to experiment with selecting streams with low dependencies on other streams and in another experiment with high dependencies first.
+
+We also want to experiment with the subset size of streams to be scheduled in one solving round.
+
+Are there more measures which we can experiment with?
+
+\subsubsection{ML based selection}
+We want to experiment if we can train a ML model for selecting the best subset of streams to be scheduled.
+
+\subsubsection{Subset in parallel}
+Can we select subsets of the network to schedule in parallel with merging afterwards? Either by having network subnets which have clear communication points or using streams which do not have any overlap.
+
+\subsection{SMT focused}
+\subsubsection{Preprocessing formulas}
+Another question is if the TSN SMT formulas can be reduced or changed in such a way that the runtime of a general SMT solver is reduced.
+
+\subsubsection{Changing the model}
+Is it possible to increase scheduling performance when the model for the SMT solver is changed?
+
+Can we increase performance by using a window-based approach for the model, rather then frames having individual offsets, there are only windows were a frame can be placed. Without regards to its size.
+
+Frame-based, Stream-based, Frame-Fragment-based
+
+\bibliographystyle{plain}
+\bibliography{../bibliography}
+
+\end{document}

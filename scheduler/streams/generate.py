@@ -5,7 +5,7 @@ from scheduler.constants import MAX_MTU_SIZE_IN_BYTES
 
 from typing import Sequence
 
-def generate_streams(count: int, network: Network, seed: int) -> Sequence[Stream]:
+def generate_streams(count: int, / , *, network: Network, seed: int) -> Sequence[Stream]:
     random.seed(seed)
 
     streams = []

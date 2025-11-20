@@ -37,32 +37,3 @@ class Stream():
     def __hash__(self):
         return hash(self.name)
     
-from abc import ABC, abstractmethod
-
-class StreamDependencyGraph(ABC):
-    def __init__(self, streams: Sequence[Stream]):
-        self.streams = streams
-        self.graph = {}
-        self.calculate_dependencies()
-
-    @abstractmethod
-    def calculate_dependencies(self):
-        pass
-
-class SameLinkSchedulingStreamDependencyGraph(StreamDependencyGraph):
-    def calculate_dependencies(self):
-        for stream1 in self.streams:
-            for stream2 in self.streams:
-                if stream1 == stream2:
-                    continue
-
-                weight = 0
-                for link1 in stream1.path:
-                    for link2 in stream2.path:
-                        if link1 != link2:
-                            continue
-
-                        weight += 1
-
-                self.graph[stream1][stream2] = weight
-                self.graph[stream2][stream1] = weight

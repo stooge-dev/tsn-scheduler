@@ -9,7 +9,7 @@ from typing import Sequence
 from scheduler.business import Network, Stream, Offset
 
 class GracuniasScheduler:
-    def __init__(self, network: Network, scheduled_queues, predefined_offsets={}):
+    def __init__(self, network: Network, / , *, scheduled_queues):
         self.network = network
         self.queues_available = scheduled_queues
         self.configure_solver()
@@ -171,7 +171,7 @@ class GracuniasScheduler:
     def access_frame_offset_variable(self, stream, link, current_frame):
         return self.frame_variable_dict[stream.name][str(link)][current_frame]["offset"]
 
-    def schedule(self, streams: Sequence[Stream], pre_offsets, new_streams):
+    def schedule(self, streams: Sequence[Stream], pre_offsets=None, new_streams=None):
         print(self.network)
         print("[~] Constraining...")
 
@@ -183,7 +183,7 @@ class GracuniasScheduler:
         
         periods = []
         for stream in streams:
-            print(stream.name + ":" + str(stream.path) + ", deadline=" + str(stream.deadline) + ", period=" + str(stream.period))
+            print(f'Stream \'{stream.name}\', {stream.path=}, {stream.deadline=}, {stream.period=}')
             periods.append(stream.period)    
     
         import math
@@ -218,6 +218,7 @@ class GracuniasScheduler:
         print(self.solver.statistics())
         print("")
         if str(check) == "sat":
+            print("[+] Schedule found")
             offsets = {}
             for stream in streams:
                 offsets.setdefault(stream.name, {})
