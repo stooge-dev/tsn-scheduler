@@ -3,17 +3,17 @@ from typing import Sequence
 from .network import Link
 
 class Stream():
-    def __init__(self, name: str, length: int, path: Sequence[Link], deadline: int, period: int):
+    def __init__(self, name: str, bytes: int, path: Sequence[Link], deadline: int, period: int):
         self.name = name
-        self.length = length
+        self.bytes = bytes
         self.path = path
         self.deadline = deadline
         self.period = period
 
-    def dst(self):
+    def dst(self) -> Link:
         return self.path[len(self.path) - 1]
     
-    def src(self):
+    def src(self) -> Link:
         return self.path[0]
     
     def adjacent_link_pairs(self):

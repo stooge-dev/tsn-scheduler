@@ -2,7 +2,7 @@ src,dst,speed,delay,macrotick
 A;ES,D;SW,100,0,1
 D;SW,B;ES,100,0,1
 D;SW,C;ES,100,0,1
-D;SW,E;ES,100,0,1
+D;SW,E;SW,100,0,1
 E;SW,F;ES,100,0,1
 E;SW,G;ES,100,0,1
 E;SW,H;ES,100,0,1

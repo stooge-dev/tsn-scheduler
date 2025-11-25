@@ -14,6 +14,12 @@ class Node():
         self.name = split_string[0]
         self.type = NodeType[split_string[1]]  
 
+    def is_endsystem(self) -> bool:
+        return self.type == NodeType.ES
+    
+    def is_switch(self) -> bool:
+        return self.type == NodeType.SW
+
     def __repr__(self):
         return self.name + ";" + self.type.value
     

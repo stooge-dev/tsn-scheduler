@@ -11,8 +11,13 @@ def generate_streams(count: int, / , *, network: Network, seed: int) -> Sequence
     streams = []
     current_idx = 0
     while len(streams) < count:
+        
         first_link_idx = random.randrange(0, len(network.links) - 1)
         first_link = network.links[first_link_idx]
+        while(first_link.src.is_switch()):
+            first_link_idx = random.randrange(0, len(network.links) - 1)
+            first_link = network.links[first_link_idx]
+        
 
         # TODO: path should not contain links that go backwards, e.g. E to D, D to E
         path = [first_link]
@@ -20,13 +25,16 @@ def generate_streams(count: int, / , *, network: Network, seed: int) -> Sequence
         deadline = 0
         for link in network.links:
 
-            if link.src == current_link.dst and link not in path:
+
+            if link.src == current_link.dst and link not in path and path[0].src != link.dst:
                 path.append(link)
                 current_link = link
 
             # heuristic...
-            deadline += (MAX_MTU_SIZE_IN_BYTES / link.speed + link.delay) * 0.66
-            
+            deadline += (MAX_MTU_SIZE_IN_BYTES / link.bytes_per_microsecond + link.delay) # * 0.66
+
+            if link.dst.is_endsystem():
+                break    
 
         if len(path) < 2:
             continue

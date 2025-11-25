@@ -65,5 +65,25 @@ if __name__ == "__main__":
 
     # Can I use this approach easily with other ground algorithms for scheduling, like HERMES?
 
-    lower_deadline_faster_solving()
+    network = read_network_from_csv("benchmarks/2_switches_6_devices/network.csv")
+    scheduler = GracuniasScheduler(network, scheduled_queues=7)
+
+    for i in [4]:
+        print(i, "---"*40)
+        streams = generate_streams(i*2, network=network, seed=i)
+        scheduler.configure_solver()
+        scheduler.schedule(streams)
+        print("Rescheduling ---"*5)
+        changed_stream = streams[i]
+        changed_stream.deadline = int(changed_stream.deadline / 2)
+        streams[i] = changed_stream
+
+        # TODO: generate streams on network such that target utilization is hit
+        # TODO: implement measure of utilization
+
+        graph = SameLinkSchedulingStreamDependencyGraph(streams)
+        scheduler.configure_solver()
+        scheduler.schedule(streams)
+        
+
     

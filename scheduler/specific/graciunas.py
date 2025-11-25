@@ -29,7 +29,7 @@ class GracuniasScheduler:
 
                     # i don't need todo (stream.length / (link.speed * 1000 * 1000)) / 1000 / 1000
                     # 100 Mbytes per second == 100 bytes per microsecond
-                    frame_transmission_duration_in_macroticks = (stream.length / link.speed) / link.macrotick
+                    frame_transmission_duration_in_macroticks = (stream.bytes / link.bytes_per_microsecond) / link.macrotick
                     self.solver.add(z3.And(self.access_frame_offset_variable(stream, link, current_frame) >= current_frame * frame_period_in_macroticks, 
                                            
                                            self.access_frame_offset_variable(stream, link, current_frame) <= current_frame * frame_period_in_macroticks + frame_period_in_macroticks - frame_transmission_duration_in_macroticks))
@@ -47,8 +47,8 @@ class GracuniasScheduler:
                         
                         for current_frame_stream1 in range(self.frame_count[stream1]):
                             for current_frame_stream2 in range(self.frame_count[stream2]):
-                                stream2_frame_transmission_duration_in_macroticks = (stream2.length / link_stream2.speed) / link_stream2.macrotick
-                                stream1_frame_transmission_duration_in_macroticks = (stream1.length / link_stream1.speed) / link_stream1.macrotick
+                                stream2_frame_transmission_duration_in_macroticks = (stream2.bytes / link_stream2.bytes_per_microsecond) / link_stream2.macrotick
+                                stream1_frame_transmission_duration_in_macroticks = (stream1.bytes / link_stream1.bytes_per_microsecond) / link_stream1.macrotick
                                 
                                 stream2_period_in_macroticks = stream2.period / link_stream2.macrotick
                                 stream1_period_in_macroticks = stream1.period / link_stream1.macrotick
@@ -74,7 +74,7 @@ class GracuniasScheduler:
             for (link1, link2) in stream.adjacent_link_pairs():
                 for current_frame in range(self.frame_count[stream]):
                     # TODO: pheta for time precision
-                    frame_transmission_duration_in_macroticks = int((stream.length / link1.speed) / link1.macrotick)
+                    frame_transmission_duration_in_macroticks = int((stream.bytes / link1.bytes_per_microsecond) / link1.macrotick)
                     self.solver.add(self.access_frame_offset_variable(stream, link2, current_frame) * link2.macrotick - link1.delay >= (self.access_frame_offset_variable(stream, link1, current_frame) + frame_transmission_duration_in_macroticks) * link1.macrotick)
           
     def add_end_to_end_constraints(self, streams):
@@ -82,7 +82,7 @@ class GracuniasScheduler:
             for current_frame in range(self.frame_count[stream]):
                 src = stream.src()
                 dst = stream.dst()
-                frame_transmission_duration_in_macroticks = (stream.length / dst.speed) / dst.macrotick
+                frame_transmission_duration_in_macroticks = (stream.bytes / dst.bytes_per_microsecond) / dst.macrotick
                 self.solver.add(src.macrotick * self.access_frame_offset_variable(stream, src, current_frame) + stream.deadline >= dst.macrotick * self.access_frame_offset_variable(stream, dst, current_frame) + frame_transmission_duration_in_macroticks)
 
     def add_stream_isolation_constraints(self, streams):
@@ -146,7 +146,7 @@ class GracuniasScheduler:
         for stream in streams:
             for link in stream.path:
                 for current_frame in range(self.frame_count[stream]):
-                    frame_transmission_length = stream.length / link.speed
+                    frame_transmission_length = stream.bytes / link.bytes_per_microsecond
                     task_str = link.__str__()
                     df.append(dict(Task=str(task_str), Start=self.solver.model()[self.access_frame_offset_variable(stream, link, current_frame)].as_long(), Finish=self.solver.model()[self.frame_variable_dict[stream][link][current_frame]["offset"]].as_long()+frame_transmission_length, Resource=stream.name))
 
@@ -183,7 +183,7 @@ class GracuniasScheduler:
         
         periods = []
         for stream in streams:
-            print(f'Stream \'{stream.name}\', {stream.path=}, {stream.deadline=}, {stream.period=}')
+            print(f'Stream \'{stream.name}\', {stream.path=}, {stream.bytes=}, {stream.deadline=}, {stream.period=}')
             periods.append(stream.period)    
     
         import math

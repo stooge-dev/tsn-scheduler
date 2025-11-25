@@ -11,10 +11,10 @@ def read_network_from_csv(filename: str) -> Network:
             src = Node(row["src"])
             dst = Node(row["dst"])
 
-            link = Link(src=src, dst=dst,delay=int(row["delay"]),speed=int(row["speed"]),macrotick=int(row["macrotick"]))
+            link = Link(src=src, dst=dst,delay=int(row["delay"]),mega_bits_per_second=int(row["speed"]),macrotick=int(row["macrotick"]))
             links.append(link)
 
-            link = Link(src=dst, dst=src, delay=int(row["delay"]),speed=int(row["speed"]),macrotick=int(row["macrotick"]))
+            link = Link(src=dst, dst=src, delay=int(row["delay"]),mega_bits_per_second=int(row["speed"]),macrotick=int(row["macrotick"]))
             links.append(link)
             
         return Network(links)
