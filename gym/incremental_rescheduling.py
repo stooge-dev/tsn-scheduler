@@ -68,7 +68,7 @@ if __name__ == "__main__":
     network = read_network_from_csv("benchmarks/2_switches_6_devices/network.csv")
     scheduler = GracuniasScheduler(network, scheduled_queues=7)
 
-    for i in [4]:
+    for i in [4, 5, 6, 7, 8]:
         print(i, "---"*40)
         streams = generate_streams(i*2, network=network, seed=i)
         scheduler.configure_solver()

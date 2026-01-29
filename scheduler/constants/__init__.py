@@ -1,1 +1,1 @@
-from .ethernet import MAX_MTU_SIZE_IN_BYTES
+from .ethernet import MAX_ETHERNET_FRAME_SIZE_IN_BYTES, ETHERNET_MTU_SIZE_IN_BYTES
