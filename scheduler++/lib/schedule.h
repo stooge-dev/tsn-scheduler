@@ -1,0 +1,6 @@
+#ifndef SCHEDULER_PP_SCHEDULE_H
+#define SCHEDULER_PP_SCHEDULE_H
+
+int test();
+
+#endif /* SCHEDULER_PP_SCHEDULE_H */

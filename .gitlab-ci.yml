@@ -1,0 +1,6 @@
+build-job:
+  stage: build
+  script:
+    - cd scheduler++
+    - cmake -B build -DCMAKE_CXX_STANDARD=20
+    - cmake --build build
