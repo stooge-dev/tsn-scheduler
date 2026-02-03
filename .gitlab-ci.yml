@@ -1,6 +1,9 @@
 build-job:
-  image: kitware/cmake
+  image: gcc
   stage: build
+  before_script:
+    - apt-get update --yes
+    - apt-get install --yes cmake
   script:
     - cd scheduler++
     - cmake -B build -DCMAKE_CXX_STANDARD=20
