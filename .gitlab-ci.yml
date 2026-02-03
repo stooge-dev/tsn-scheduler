@@ -1,5 +1,5 @@
 build-job:
-  image: cmake
+  image: kitware/cmake
   stage: build
   script:
     - cd scheduler++
