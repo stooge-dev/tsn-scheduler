@@ -1,5 +1,5 @@
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include "scheduling/schedule_interface.h"
 #include "scheduling/gracunias.h"

@@ -6,5 +6,5 @@ build-job:
     - apt-get install --yes cmake
   script:
     - cd scheduler++
-    - cmake -B build -DCMAKE_CXX_STANDARD=20
+    - cmake --preset default
     - cmake --build build

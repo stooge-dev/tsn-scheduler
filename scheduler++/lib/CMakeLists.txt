@@ -4,6 +4,10 @@ target_sources(scheduler
     PRIVATE
         schedule.cpp
         scheduling/gracunias.cpp
+        business/link.cpp
+        business/node.cpp
+        business/network.cpp 
+        business/stream.cpp 
     
     PUBLIC
         FILE_SET libheaders
@@ -12,4 +16,8 @@ target_sources(scheduler
             schedule.h
             scheduling/gracunias.h
             scheduling/schedule_interface.h
+            business/link.h 
+            business/node.h
+            business/stream.h 
+            business/network.h
 )
