@@ -25,7 +25,7 @@ namespace scheduler_pp::cli
                 if(sub_command->parsed()) {
                     for(const auto& scheduler: schedulers()) {
                         if(sub_command->get_name() == scheduler->name()) {
-                            scheduler->schedule();
+                            // scheduler->schedule();
                         }
                     }
                 }

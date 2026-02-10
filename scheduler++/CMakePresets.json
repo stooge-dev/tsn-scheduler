@@ -5,7 +5,7 @@
             "name": "default",
             "binaryDir": "${sourceDir}/build",
             "cacheVariables": {
-                "CMAKE_CXX_STANDARD": "20"
+                "CMAKE_CXX_STANDARD": "23"
             }
         }
     ]
