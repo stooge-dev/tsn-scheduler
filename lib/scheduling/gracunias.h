@@ -10,8 +10,9 @@
 
 class GracuniasScheduler: public SchedulerBase
 {
-    void schedule(Network network, std::vector<Stream> streams, int scheduled_queues = 8) override;
-    std::string name() override;
+    public:
+        void schedule(Network network, std::vector<Stream> streams, int scheduled_queues = 8) override;
+        std::string name() override;
 };
 
 #endif /* SCHEDULER_PP_SCHEDULING_GRACUNIAS_H */

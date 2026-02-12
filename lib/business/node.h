@@ -4,16 +4,16 @@
 #include <string>
 #include <iostream>
 
-enum class NodeType { Endsystem, Switch };
+//enum class NodeType { Endsystem, Switch };
 
 class Node 
 {
     private:
         const std::string name;
-        const NodeType type;
+        //const NodeType type;
     public:
-        Node(std::string name, NodeType type)
-            : name(name), type(type) {};
+        Node(std::string name)
+            : name(name) {};
         friend std::ostream& operator<<(std::ostream& out, const Node& node);
         std::string get_name() const { return this->name; };
 };

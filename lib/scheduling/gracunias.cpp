@@ -190,10 +190,11 @@ void GracuniasScheduler::schedule(Network network, std::vector<Stream> streams, 
     }
 
     // TODO: solve
-    solver.check();
-    
+    auto result = solver.check();
+    std::cout << "Result: " << result << std::endl;
 
     // TODO: calculate offsets 
+
 }
 
 std::string GracuniasScheduler::name() 
