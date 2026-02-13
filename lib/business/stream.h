@@ -20,7 +20,7 @@ class Stream
         const int get_bytes() const { return this->bytes; };
         const int get_deadline() const { return this->deadline; };
         std::vector<std::tuple<Link, Link>> get_adjacent_link_pairs() const;
-        const Link& get_dst() const { return this->path.at(this->path.size()); };
+        const Link& get_dst() const { return this->path.at(this->path.size() - 1); };
         const Link& get_src() const { return this->path.at(0); };
     private:
         const std::string name;

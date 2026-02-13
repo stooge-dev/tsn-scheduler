@@ -16,8 +16,8 @@ class Link
             mega_bits_per_second(mega_bits_per_second), 
             bits_per_second(mega_bits_per_second * 1000 * 1000),
             bits_per_microsecond(mega_bits_per_second),
-            bytes_per_microsecond(mega_bits_per_second / 8), 
-            bytes_per_second(this->bits_per_second / 8),
+            bytes_per_microsecond(mega_bits_per_second / 8.f), // TODO this was an implicit conversion, why?
+            bytes_per_second(this->bits_per_second / 8.f),
             delay(delay), 
             macrotick(macrotick) 
         {};
@@ -26,7 +26,7 @@ class Link
         const Node& get_dst() const { return this->dst; };
         std::string get_key() const { return std::string(this->get_src().get_name()) += this->get_dst().get_name(); };
         const int get_macrotick() const { return this->macrotick; };
-        const int get_bytes_per_microsecond() const { return this->bytes_per_microsecond; };
+        const float get_bytes_per_microsecond() const { return this->bytes_per_microsecond; };
         const int get_delay() const { return this->delay; };
     private:
         const Node dst;
@@ -36,8 +36,8 @@ class Link
         const int bits_per_second;
         const int bits_per_microsecond;
         
-        const int bytes_per_microsecond;
-        const int bytes_per_second;
+        const float bytes_per_microsecond;
+        const float bytes_per_second;
 
         const int delay;
         const int macrotick;

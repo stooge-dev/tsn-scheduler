@@ -54,6 +54,7 @@ namespace scheduler_pp::experiments::subnet {
         streamPathCommand.emplace_back(linksFull.at(0));
         streamPathCommand.emplace_back(linksFull.at(6));
         streamPathCommand.emplace_back(linksFull.at(7));
+        streamPathCommand.emplace_back(linksFull.at(10));
         streamsFull.emplace_back("command", 1000, streamPathCommand, 1000, 1000);
         
         scheduler.schedule(networkFull, streamsFull);
