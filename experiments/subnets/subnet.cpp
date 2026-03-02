@@ -1,99 +1,71 @@
 #include <iostream>
 
-#include "subnet.h"
-#include "scheduling/gracunias.h"
-#include "business/network.h"
-#include "business/link.h"
-#include "business/node.h"
-#include "business/stream.h"
+#include "subnet.hpp"
+#include "scheduling/gracunias.hpp"
+#include "business/link.hpp"
+#include "business/stream.hpp"
 
 namespace scheduler_pp::experiments::subnet {
     int main(int argc, char** argv) {
-        auto scheduler = GracuniasScheduler{};
-
-        auto nodeA = Node{"A"};
-        auto nodeB = Node{"B"};
-        auto nodeC = Node{"C"};
-        auto nodeD = Node{"D"};
-        auto nodeE = Node{"E"};
-        auto nodeF = Node{"F"};
-        auto nodeG = Node{"G"};
-        auto nodeH = Node{"H"};
-        auto nodeJ = Node{"J"};
+        auto scheduler = scheduler_pp::lib::scheduling::GracuniasScheduler{};
+        auto network = scheduler_pp::lib::business::Network{};
 
         // TODO: schedule XYZ in one big network
-        auto linksFull = std::vector<Link>{};
-        linksFull.emplace_back(nodeA, nodeB, 100, 0, 1);
-        linksFull.emplace_back(nodeB, nodeA, 100, 0, 1);
-        linksFull.emplace_back(nodeB, nodeD, 100, 0, 1);
-        linksFull.emplace_back(nodeD, nodeB, 100, 0, 1);
-        linksFull.emplace_back(nodeD, nodeC, 100, 0, 1);
-        linksFull.emplace_back(nodeC, nodeD, 100, 0, 1);
+        network.create_link("A", "B", 100, 0, 1);
+        network.create_link("B", "A", 100, 0, 1);
+        network.create_link("B", "D", 100, 0, 1);
+        network.create_link("D", "B", 100, 0, 1);
+        network.create_link("D", "C", 100, 0, 1);
+        network.create_link("C", "D", 100, 0, 1);
 
-        linksFull.emplace_back(nodeB, nodeE, 100, 0, 1);
-        linksFull.emplace_back(nodeE, nodeG, 100, 0, 1);
-        linksFull.emplace_back(nodeG, nodeF, 100, 0, 1);
-        linksFull.emplace_back(nodeF, nodeD, 100, 0, 1);
+        network.create_link("B", "E", 100, 0, 1);
+        network.create_link("E", "G", 100, 0, 1);
+        network.create_link("G", "F", 100, 0, 1);
+        network.create_link("F", "D", 100, 0, 1);
+
+        network.create_link("G", "H", 100, 0, 1);
+        network.create_link("H", "G", 100, 0, 1);
+        network.create_link("G", "J", 100, 0, 1);
+        network.create_link("J", "G", 100, 0, 1);
+
+        auto streamSet = scheduler_pp::lib::business::StreamSet{network};
+
+        streamSet.create_stream("video", 1000, {"A", "B", "E", "G", "H"}, 1000, 1000);
+        streamSet.create_stream("command", 1000, {"A", "B", "E", "G", "H"}, 1000, 1000);
         
-        linksFull.emplace_back(nodeG, nodeH, 100, 0, 1);
-        linksFull.emplace_back(nodeH, nodeG, 100, 0, 1);
-        linksFull.emplace_back(nodeG, nodeJ, 100, 0, 1);
-        linksFull.emplace_back(nodeJ, nodeG, 100, 0, 1);
+        /** schedule XYZ **/
+        scheduler.schedule(streamSet);
 
-        auto networkFull = Network{linksFull};
-
-        auto streamsFull = std::vector<Stream>{};
-        auto streamPathVideo = std::vector<Link>{};
-        streamPathVideo.emplace_back(linksFull.at(0));
-        streamPathVideo.emplace_back(linksFull.at(6));
-        streamPathVideo.emplace_back(linksFull.at(7));
-        streamPathVideo.emplace_back(linksFull.at(10));
-        streamsFull.emplace_back("video", 1000, streamPathVideo, 1000, 1000);
-
-        auto streamPathCommand = std::vector<Link>{};
-        streamPathCommand.emplace_back(linksFull.at(0));
-        streamPathCommand.emplace_back(linksFull.at(6));
-        streamPathCommand.emplace_back(linksFull.at(7));
-        streamPathCommand.emplace_back(linksFull.at(10));
-        streamsFull.emplace_back("command", 1000, streamPathCommand, 1000, 1000);
-        
-        scheduler.schedule(networkFull, streamsFull);
-
-        auto linksZ = std::vector<Link>{};
-        linksZ.emplace_back(nodeB, nodeE, 100, 0, 1);
-        linksZ.emplace_back(nodeE, nodeG, 100, 0, 1);
-        linksZ.emplace_back(nodeG, nodeF, 100, 0, 1);
-        linksZ.emplace_back(nodeF, nodeD, 100, 0, 1);
-
-        auto streamsZ = std::vector<Stream>{};
-
-        
-        
-        
         // TODO: schedule Z
-        // scheduler.schedule();
+        auto networkZ = scheduler_pp::lib::business::Network{};
+        networkZ.create_link("B", "E", 100, 0, 1);
+        networkZ.create_link("E", "G", 100, 0, 1);
+        networkZ.create_link("G", "F", 100, 0, 1);
+        networkZ.create_link("F", "D", 100, 0, 1);
+
+        // TODO: define streamSet for Z
+        auto streamSetZ = scheduler_pp::lib::business::StreamSet{networkZ};
 
         // TODO: get offsets
         // TODO: make offsets limits for streams in X and Y
         // TODO: schedule X and Y
+        auto networkX = scheduler_pp::lib::business::Network{};
+        networkX.create_link("A", "B", 100, 0, 1);
+        networkX.create_link("B", "A", 100, 0, 1);
+        networkX.create_link("B", "D", 100, 0, 1);
+        networkX.create_link("D", "B", 100, 0, 1);
+        networkX.create_link("D", "C", 100, 0, 1);
+        networkX.create_link("C", "D", 100, 0, 1);
 
-        auto linksX = std::vector<Link>{};
-        linksX.emplace_back(nodeA, nodeB, 100, 0, 1);
-        linksX.emplace_back(nodeB, nodeA, 100, 0, 1);
-        linksX.emplace_back(nodeB, nodeD, 100, 0, 1);
-        linksX.emplace_back(nodeD, nodeB, 100, 0, 1);
-        linksX.emplace_back(nodeC, nodeD, 100, 0, 1);
-        linksX.emplace_back(nodeC, nodeD, 100, 0, 1);
+        auto streamSetX = scheduler_pp::lib::business::StreamSet{networkX};
 
-        auto streamsX = std::vector<Stream>{};
-        auto linksY = std::vector<Link>{};
-        linksY.emplace_back(nodeH, nodeG, 100, 0, 1);
-        linksY.emplace_back(nodeG, nodeH, 100, 0, 1);
-        linksY.emplace_back(nodeJ, nodeG, 100, 0, 1);
-        linksY.emplace_back(nodeG, nodeJ, 100, 0, 1);
-
-        auto streamsY = std::vector<Stream>{};
-
+        auto networkY = scheduler_pp::lib::business::Network{};
+        networkY.create_link("G", "H", 100, 0, 1);
+        networkY.create_link("H", "G", 100, 0, 1);
+        networkY.create_link("G", "J", 100, 0, 1);
+        networkY.create_link("J", "G", 100, 0, 1);
+  
+        auto streamSetY = scheduler_pp::lib::business::StreamSet{networkY};
         
 
         return 0;

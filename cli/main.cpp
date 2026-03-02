@@ -4,8 +4,8 @@
 
 #include "CLI/CLI.hpp"
 
-#include "commands.h"
-#include "schedule.h"
+#include "commands.hpp"
+#include "schedule.hpp"
 
 namespace scheduler_pp::cli 
 {
@@ -14,7 +14,7 @@ namespace scheduler_pp::cli
         auto cli = CLI::App{ "TSN scheduler"};
         
         auto schedule_sub_command = cli.add_subcommand("schedule", "Scheduling subcommand");
-        for(const auto& scheduler: schedulers()) {
+        for(const auto& scheduler: scheduler_pp::lib::schedulers()) {
             schedule_sub_command->add_subcommand(scheduler->name(), "");
         }
 
@@ -23,7 +23,7 @@ namespace scheduler_pp::cli
         if(schedule_sub_command->parsed()) {
             for(const auto& sub_command: schedule_sub_command->get_subcommands()) {
                 if(sub_command->parsed()) {
-                    for(const auto& scheduler: schedulers()) {
+                    for(const auto& scheduler: scheduler_pp::lib::schedulers()) {
                         if(sub_command->get_name() == scheduler->name()) {
                             // scheduler->schedule();
                         }

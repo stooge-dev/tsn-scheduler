@@ -1,7 +1,9 @@
 #include <iostream>
 
-#include "link.h"
+#include "link.hpp"
 
-std::ostream& operator<<(std::ostream& out, const Link& link) {
-    return out << link.mega_bits_per_second;
+namespace scheduler_pp::lib::business {
+    std::ostream& operator<<(std::ostream& out, const Link& link) {
+        return out << link.mega_bits_per_second;
+    }
 }

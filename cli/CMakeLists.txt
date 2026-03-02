@@ -4,7 +4,7 @@ target_sources(scheduler_cli
     PRIVATE 
         main.cpp
         commands.cpp
-        commands.h
+        commands.hpp
 )
 
 target_link_libraries(scheduler_cli PRIVATE scheduler)

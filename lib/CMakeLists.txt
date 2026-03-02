@@ -5,21 +5,21 @@ target_sources(scheduler
         schedule.cpp
         scheduling/gracunias.cpp
         business/link.cpp
-        business/node.cpp
-        business/network.cpp 
-        business/stream.cpp 
+        business/stream.cpp
+        business/network.cpp
+        business/stream_set.cpp
     
     PUBLIC
         FILE_SET libheaders
         TYPE HEADERS
         FILES 
-            schedule.h
-            scheduling/gracunias.h
-            scheduling/schedule_interface.h
-            business/link.h 
-            business/node.h
-            business/stream.h 
-            business/network.h
+            schedule.hpp
+            scheduling/gracunias.hpp
+            scheduling/scheduler_base.hpp
+            business/link.hpp
+            business/stream.hpp 
+            business/network.hpp
+            business/stream_set.hpp
 )
 
 include(FetchContent)
