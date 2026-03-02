@@ -1,0 +1,10 @@
+#ifndef SCHEDULER_PP_EXPERIMENTS_INCREMENTAL_INCREMENTAL_H_
+#define SCHEDULER_PP_EXPERIMENTS_INCREMENTAL_INCREMENTAL_H_
+
+namespace scheduler_pp::experiments::incremental {
+    class Incremental {
+
+    };
+}
+
+#endif /* SCHEDULER_PP_EXPERIMENTS_INCREMENTAL_INCREMENTAL_H_ */

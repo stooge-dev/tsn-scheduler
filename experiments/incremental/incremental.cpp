@@ -1,3 +1,8 @@
+#include "incremental.hpp"
+
+/*
+This is the old python code.
+
 # voodoo magic
 import sys
 sys.path.append("/home/tisc06/RESI-TSN-DFKI/tsnscheduler")
@@ -87,3 +92,6 @@ if __name__ == "__main__":
         
 
     
+
+
+*/

@@ -1,3 +1,12 @@
+#ifndef SCHEDULER_PP_IO_GENERATE_STREAMS_H_
+#define SCHEDULER_PP_IO_GENERATE_STREAMS_H_
+
+namespace scheduler_pp::io::generate {
+    
+}
+/*
+This is the old python code
+
 import random
 
 from scheduler.business import Network, Stream
@@ -72,3 +81,7 @@ def generate_streams(count: int, / , *, network: Network, seed: int) -> Sequence
         current_idx += 1
 
     return streams
+    
+*/
+
+#endif /* SCHEDULER_PP_IO_GENERATE_STREAMS_H_ */
