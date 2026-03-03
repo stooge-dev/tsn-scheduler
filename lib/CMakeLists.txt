@@ -3,23 +3,12 @@ add_library(scheduler)
 target_sources(scheduler
     PRIVATE
         schedule.cpp
-        scheduling/gracunias.cpp
-        business/link.cpp
-        business/stream.cpp
-        business/network.cpp
-        business/stream_set.cpp
     
     PUBLIC
         FILE_SET libheaders
         TYPE HEADERS
         FILES 
             schedule.hpp
-            scheduling/gracunias.hpp
-            scheduling/scheduler_base.hpp
-            business/link.hpp
-            business/stream.hpp 
-            business/network.hpp
-            business/stream_set.hpp
 )
 
 include(FetchContent)
@@ -37,3 +26,6 @@ if(TARGET libz3)
 endif()
 
 target_link_libraries(scheduler PRIVATE libz3)
+
+add_subdirectory(business)
+add_subdirectory(scheduling)
