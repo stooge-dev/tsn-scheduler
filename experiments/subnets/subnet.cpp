@@ -49,7 +49,6 @@ namespace scheduler_pp::experiments::subnet {
 
         // TODO: add offset
         const int offsetCommand = streamSet.FrameTransmissionTimeInMicroseconds("command", 0, "A", "B");
-        std::cout << offsetCommand << std::endl;
         streamSetZ.create_stream("command", 1000, {"B", "E", "G"}, 1000, 1000, offsetCommand);
 
         const int offsetCommand2 = streamSet.FrameTransmissionTimeInMicroseconds("command2", 0, "J", "G");
