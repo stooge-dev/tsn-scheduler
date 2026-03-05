@@ -32,11 +32,14 @@ namespace scheduler_pp::lib::business {
         // TODO: what todo for frame idx?
         for(auto& stream: this->streams_) {
             if(stream.get_name().compare(stream_name) == 0) {
-                const int bpm = this->network_.get_link(src, dst).get_bytes_per_microsecond();
+                const float bpm = this->network_.get_link(src, dst).get_bytes_per_microsecond();
                 const int bytes = stream.get_bytes();
 
                 return bytes / bpm;
             }
         }
+
+        // TODO: throw or what?
+        return 0;
     };
 }

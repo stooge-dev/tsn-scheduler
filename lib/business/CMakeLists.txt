@@ -4,6 +4,7 @@ target_sources(scheduler
         stream.cpp
         network.cpp
         stream_set.cpp
+        offset.cpp
     
     PUBLIC
         FILE_SET libheaders

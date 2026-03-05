@@ -13,6 +13,7 @@ namespace scheduler_pp::lib::business {
         public:
             Offset(Link link, std::string stream_name, int frame_idx, int value): 
                 link_(link), stream_name_(stream_name), frame_idx_(frame_idx), value_(value) {};
+            friend std::ostream& operator<<(std::ostream& out, const Offset& offset);
     };
 }
 

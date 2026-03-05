@@ -12,6 +12,7 @@
 
 #include "gracunias.hpp"
 #include "business/stream_set.hpp"
+#include "business/offset.hpp"
 
 namespace scheduler_pp::lib::scheduling {
 
@@ -277,6 +278,19 @@ namespace scheduler_pp::lib::scheduling {
     
         // TODO: calculate offsets 
         // TODO: and give them back, changing SchedulerBase
+        const auto model = solver.get_model();
+        auto offsets = std::vector<scheduler_pp::lib::business::Offset>{};
+        for(auto& stream: streams) {
+            for(auto& link: stream.get_path()) {
+                const auto offset = model.eval(frame_variables[stream.get_name()][link.get_key()].at(0));
+
+                offsets.emplace_back(link, stream.get_name(), 0, offset.get_numeral_int());
+            }
+        }
+
+        for(auto& offset: offsets) {
+            std::cout << offset << std::endl;
+        }
     }
     
     std::string GracuniasScheduler::name() 
