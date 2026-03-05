@@ -86,9 +86,9 @@ namespace scheduler_pp::lib::scheduling {
                     const int frame_transmission_duration_in_macroticks = (stream.get_bytes() / link.get_bytes_per_microsecond()) / link.get_macrotick();
                     std::cout << "         [~] " << std::setw(6) << frame_transmission_duration_in_macroticks << " (frame transmission duration in macroticks)." << std::endl;
                 
-                    auto frame_must_be_send_in_period_it_belongs_to = frame_variables[stream.get_name()][link.get_key()].at(current_frame) >= current_frame * frame_period_in_macroticks;
-                    auto frame_must_be_send_before_period_is_over_minus_transmission_time = frame_variables[stream.get_name()][link.get_key()].at(current_frame) <= current_frame * frame_period_in_macroticks + frame_period_in_macroticks - frame_transmission_duration_in_macroticks;
-                    solver.add( frame_must_be_send_in_period_it_belongs_to
+                    auto frame_must_be_send_in_period_it_belongs_to_and_respect_offset = frame_variables[stream.get_name()][link.get_key()].at(current_frame) >= current_frame * frame_period_in_macroticks + stream.get_offset_start();
+                    auto frame_must_be_send_before_period_is_over_minus_transmission_time = frame_variables[stream.get_name()][link.get_key()].at(current_frame) <= current_frame * frame_period_in_macroticks + stream.get_offset_start() + frame_period_in_macroticks - frame_transmission_duration_in_macroticks;
+                    solver.add( frame_must_be_send_in_period_it_belongs_to_and_respect_offset
                                 &&
                                 frame_must_be_send_before_period_is_over_minus_transmission_time);
                 }

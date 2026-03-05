@@ -9,12 +9,14 @@
 namespace scheduler_pp::lib::business {
     class StreamSet {
         private:
-            Network network;
-            std::vector<Stream> streams;
+            Network network_;
+            std::vector<Stream> streams_;
         public:
-            StreamSet(Network network): network(network) {};
+            StreamSet(Network network): network_(network) {};
             void create_stream(std::string name, int bytes, std::vector<std::string> path, int deadline, int period);
-            const std::vector<Stream>& get_streams() const { return this->streams; };
+            void create_stream(std::string name, int bytes, std::vector<std::string> path, int deadline, int period, const int offset_start);
+            const std::vector<Stream>& get_streams() const { return this->streams_; };
+            const int FrameTransmissionTimeInMicroseconds(std::string stream_name, const int frame_idx, std::string src, std::string dst) const;
     };
 }
 
